@@ -2,46 +2,91 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
+
+<!-- 🔑 ESSENCIAL PARA MOBILE FULLSCREEN -->
+<meta name="viewport"
+      content="width=device-width,
+               height=device-height,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no">
+
 <title>PARIDADE</title>
+
 <style>
+/* RESET */
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* BODY FULLSCREEN */
 body {
-    margin:0;
     background:#0f0f0f;
-    color:#fff;
-    font-family:Arial, sans-serif;
+    color:#ffffff;
+    font-family: Arial, sans-serif;
+
     display:flex;
     justify-content:center;
     align-items:center;
-    height:100vh;
+
+    min-height:100dvh;
+    overscroll-behavior: none;
+    touch-action: manipulation;
 }
+
+/* CONTAINER DO JOGO */
 .game {
+    width:100%;
+    max-width:480px;
+    padding:12px;
+    box-sizing:border-box;
     text-align:center;
 }
+
+/* TABULEIRO */
 #board {
     display:grid;
-    gap:8px;
-    margin:15px auto;
+    gap:min(2vw, 8px);
+    margin:16px auto;
 }
+
+/* CÉLULAS */
 .cell {
-    width:60px;
-    height:60px;
+    width:min(18vw, 60px);
+    height:min(18vw, 60px);
     background:#1e1e1e;
     border-radius:10px;
     cursor:pointer;
-    transition:0.15s;
+    transition:background 0.15s;
 }
+
+/* ATIVO */
 .cell.on {
     background:#2ecc71;
 }
+
+/* TEXTO */
 .info {
     font-size:16px;
+    margin-bottom:8px;
 }
+
+/* BOTÃO */
 button {
-    padding:6px 12px;
+    padding:8px 14px;
     border:none;
-    border-radius:6px;
+    border-radius:8px;
     cursor:pointer;
-    margin-top:8px;
+    background:#333;
+    color:#fff;
+    font-size:14px;
+}
+
+button:active {
+    background:#444;
 }
 </style>
 </head>
@@ -49,39 +94,37 @@ button {
 
 <div class="game">
     <h2>PARIDADE</h2>
-    <div>Fase <b id="level">1</b></div>
-
-    <div id="board"></div>
 
     <div class="info">
-        Movimentos: <b id="moves">0</b>
+        Fase <b id="level">1</b> · Movimentos <b id="moves">0</b>
     </div>
+
+    <div id="board"></div>
 
     <button onclick="reset()">Reiniciar Fase</button>
 </div>
 
 <script>
+/* ===============================
+   FASES DESENHADAS À MÃO
+================================ */
 const levels = [
-    // Fase 1 – aprender regra
     [
         [0,1,0],
         [1,1,1],
         [0,1,0]
     ],
-    // Fase 2 – pensar em cruz
     [
         [1,0,1],
         [0,1,0],
         [1,0,1]
     ],
-    // Fase 3 – armadilha visual
     [
         [1,1,0,1],
         [0,1,1,0],
         [1,1,0,1],
         [0,0,1,0]
     ],
-    // Fase 4 – padrão menos óbvio
     [
         [0,1,1,0],
         [1,0,0,1],
@@ -98,24 +141,37 @@ const boardEl = document.getElementById("board");
 const movesEl = document.getElementById("moves");
 const levelEl = document.getElementById("level");
 
+/* ===============================
+   CARREGAR FASE
+================================ */
 function loadLevel() {
-    board = levels[level].map(r => r.slice());
+    board = levels[level].map(row => row.slice());
     moves = 0;
+
     levelEl.textContent = level + 1;
-    boardEl.style.gridTemplateColumns = `repeat(${board[0].length}, 60px)`;
+    movesEl.textContent = moves;
+
+    boardEl.style.gridTemplateColumns =
+        `repeat(${board[0].length}, min(18vw, 60px))`;
+
     render();
 }
 
+/* ===============================
+   RENDER
+================================ */
 function render() {
     boardEl.innerHTML = "";
+
     board.forEach((row, y) => {
-        row.forEach((v, x) => {
+        row.forEach((value, x) => {
             const cell = document.createElement("div");
-            cell.className = "cell" + (v ? " on" : "");
+            cell.className = "cell" + (value ? " on" : "");
             cell.onclick = () => clickCell(x, y);
             boardEl.appendChild(cell);
         });
     });
+
     movesEl.textContent = moves;
 
     if (checkWin()) {
@@ -123,7 +179,7 @@ function render() {
             alert("✔ Fase concluída");
             level++;
             if (level >= levels.length) {
-                alert("🎉 Você completou todos os desafios!");
+                alert("🎉 Você concluiu todos os desafios!");
                 level = 0;
             }
             loadLevel();
@@ -131,8 +187,17 @@ function render() {
     }
 }
 
+/* ===============================
+   MECÂNICA
+================================ */
 function toggle(x, y) {
-    if (y < 0 || x < 0 || y >= board.length || x >= board[0].length) return;
+    if (
+        x < 0 ||
+        y < 0 ||
+        y >= board.length ||
+        x >= board[0].length
+    ) return;
+
     board[y][x] = board[y][x] ? 0 : 1;
 }
 
@@ -146,14 +211,21 @@ function clickCell(x, y) {
     render();
 }
 
+/* ===============================
+   WIN
+================================ */
 function checkWin() {
-    return board.every(r => r.every(v => v === 0));
+    return board.every(row => row.every(v => v === 0));
 }
 
+/* ===============================
+   RESET
+================================ */
 function reset() {
     loadLevel();
 }
 
+/* START */
 loadLevel();
 </script>
 

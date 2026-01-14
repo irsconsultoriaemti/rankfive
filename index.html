@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>PARIDADE</title>
+<style>
+body {
+    margin:0;
+    background:#0f0f0f;
+    color:#fff;
+    font-family:Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+.game {
+    text-align:center;
+}
+#board {
+    display:grid;
+    gap:8px;
+    margin:15px auto;
+}
+.cell {
+    width:60px;
+    height:60px;
+    background:#1e1e1e;
+    border-radius:10px;
+    cursor:pointer;
+    transition:0.15s;
+}
+.cell.on {
+    background:#2ecc71;
+}
+.info {
+    font-size:16px;
+}
+button {
+    padding:6px 12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    margin-top:8px;
+}
+</style>
+</head>
+<body>
+
+<div class="game">
+    <h2>PARIDADE</h2>
+    <div>Fase <b id="level">1</b></div>
+
+    <div id="board"></div>
+
+    <div class="info">
+        Movimentos: <b id="moves">0</b>
+    </div>
+
+    <button onclick="reset()">Reiniciar Fase</button>
+</div>
+
+<script>
+const levels = [
+    // Fase 1 – aprender regra
+    [
+        [0,1,0],
+        [1,1,1],
+        [0,1,0]
+    ],
+    // Fase 2 – pensar em cruz
+    [
+        [1,0,1],
+        [0,1,0],
+        [1,0,1]
+    ],
+    // Fase 3 – armadilha visual
+    [
+        [1,1,0,1],
+        [0,1,1,0],
+        [1,1,0,1],
+        [0,0,1,0]
+    ],
+    // Fase 4 – padrão menos óbvio
+    [
+        [0,1,1,0],
+        [1,0,0,1],
+        [1,0,0,1],
+        [0,1,1,0]
+    ]
+];
+
+let level = 0;
+let board = [];
+let moves = 0;
+
+const boardEl = document.getElementById("board");
+const movesEl = document.getElementById("moves");
+const levelEl = document.getElementById("level");
+
+function loadLevel() {
+    board = levels[level].map(r => r.slice());
+    moves = 0;
+    levelEl.textContent = level + 1;
+    boardEl.style.gridTemplateColumns = `repeat(${board[0].length}, 60px)`;
+    render();
+}
+
+function render() {
+    boardEl.innerHTML = "";
+    board.forEach((row, y) => {
+        row.forEach((v, x) => {
+            const cell = document.createElement("div");
+            cell.className = "cell" + (v ? " on" : "");
+            cell.onclick = () => clickCell(x, y);
+            boardEl.appendChild(cell);
+        });
+    });
+    movesEl.textContent = moves;
+
+    if (checkWin()) {
+        setTimeout(() => {
+            alert("✔ Fase concluída");
+            level++;
+            if (level >= levels.length) {
+                alert("🎉 Você completou todos os desafios!");
+                level = 0;
+            }
+            loadLevel();
+        }, 150);
+    }
+}
+
+function toggle(x, y) {
+    if (y < 0 || x < 0 || y >= board.length || x >= board[0].length) return;
+    board[y][x] = board[y][x] ? 0 : 1;
+}
+
+function clickCell(x, y) {
+    moves++;
+    toggle(x, y);
+    toggle(x+1, y);
+    toggle(x-1, y);
+    toggle(x, y+1);
+    toggle(x, y-1);
+    render();
+}
+
+function checkWin() {
+    return board.every(r => r.every(v => v === 0));
+}
+
+function reset() {
+    loadLevel();
+}
+
+loadLevel();
+</script>
+
+</body>
+</html>
